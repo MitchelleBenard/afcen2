@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AfCEN Venture Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0f0f10;
+    --surface:   #181819;
+    --border:    #2a2a2d;
+    --accent:    #d4a843;
+    --accent2:   #e8c46a;
+    --text:      #e8e6e1;
+    --muted:     #6b6966;
+    --user-bg:   #1e1e20;
+    --agent-bg:  #161618;
+    --sidebar-w: 260px;
+    --radius:    14px;
+  }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; font-size: 14px; }
+
+  /* ── Layout ── */
+  .shell { display: flex; height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-head {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #0f0f10;
+    flex-shrink: 0;
+  }
+
+  .logo-text { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; line-height: 1.2; }
+  .logo-sub  { font-size: 10px; color: var(--muted); font-weight: 400; }
+
+  .new-chat-btn {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--accent);
+    color: #0f0f10;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .new-chat-btn:hover { background: var(--accent2); }
+  .new-chat-btn svg { flex-shrink: 0; }
+
+  .sidebar-label {
+    padding: 14px 16px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .venture-list { flex: 1; overflow-y: auto; padding: 0 8px 16px; }
+  .venture-list::-webkit-scrollbar { width: 4px; }
+  .venture-list::-webkit-scrollbar-track { background: transparent; }
+  .venture-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .venture-item {
+    padding: 10px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.1s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .venture-item:hover { background: #222224; }
+  .venture-item.active { background: #222224; border-color: var(--border); }
+
+  .venture-title {
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+
+  .venture-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--muted);
+  }
+
+  .status-dot {
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  }
+  .status-dot.active  { background: #4ade80; }
+  .status-dot.draft   { background: var(--accent); }
+  .status-dot.paused  { background: #6b7280; }
+
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 10px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── Builder bar ── */
+  .builder-bar {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface);
+  }
+
+  .builder-bar label { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+  .builder-select {
+    flex: 1; max-width: 280px;
+    padding: 7px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+  }
+  .builder-select:focus { border-color: var(--accent); }
+
+  .add-builder-btn {
+    padding: 7px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .add-builder-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Chat area ── */
+  .chat-area {
+    flex: 1; overflow-y: auto;
+    padding: 32px 0;
+    display: flex; flex-direction: column;
+    gap: 0;
+  }
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 24px; text-align: center; gap: 12px;
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 4px; }
+  .empty-title { font-size: 18px; font-weight: 600; }
+  .empty-sub { font-size: 13px; color: var(--muted); max-width: 340px; line-height: 1.6; }
+
+  .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+  .chip {
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px; color: var(--text);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Messages ── */
+  .msg-row {
+    padding: 16px 24px;
+    display: flex; gap: 14px;
+    animation: fadeUp 0.2s ease;
+  }
+  .msg-row.user   { background: var(--user-bg); }
+  .msg-row.agent  { background: var(--agent-bg); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .avatar.user  { background: #2a2a3a; color: var(--accent); }
+  .avatar.agent { background: var(--accent); color: #0f0f10; }
+
+  .msg-content { flex: 1; line-height: 1.7; font-size: 13.5px; }
+  .msg-sender  { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .msg-text { color: var(--text); }
+  .msg-text p { margin-bottom: 8px; }
+  .msg-text p:last-child { margin-bottom: 0; }
+
+  /* Approval card */
+  .approval-card {
+    margin-top: 12px;
+    background: #1a1a1c;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .approval-header {
+    padding: 12px 16px;
+    background: #1e1e20;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .approval-body { padding: 14px 16px; }
+
+  .price-range {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; font-weight: 500;
+    color: var(--accent2); margin-bottom: 10px;
+  }
+  .price-currency { font-size: 13px; color: var(--muted); margin-right: 4px; }
+
+  .reasoning-text {
+    font-size: 12px; color: #a09d98; line-height: 1.6; margin-bottom: 14px;
+  }
+
+  .market-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    background: var(--bg); border-radius: 6px;
+    padding: 10px 12px; line-height: 1.8;
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+  }
+
+  .approval-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn-approve {
+    padding: 8px 18px;
+    background: #166534; color: #4ade80;
+    border: 1px solid #15803d;
+    border-radius: 8px; font-family: 'Sora', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-approve:hover { background: #15803d; }
+
+  .btn-reject {
+    padding: 8px 18px;
+    background: transparent; color: #f87171;
+    border: 1px solid #7f1d1d;
+    border-radius: 8px; font-family: 'Sora', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-reject:hover { background: #1c0909; }
+
+  .btn-edit {
+    padding: 8px 18px;
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px; font-family: 'Sora', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-edit:hover { border-color: var(--accent); color: var(--accent); }
+
+  .edit-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; display: none; }
+  .edit-input {
+    flex: 1; padding: 7px 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    outline: none;
+  }
+  .edit-input:focus { border-color: var(--accent); }
+  .btn-confirm-edit {
+    padding: 7px 14px;
+    background: var(--accent); color: #0f0f10;
+    border: none; border-radius: 8px;
+    font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 20px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .badge.approved { background: #14532d; color: #4ade80; }
+  .badge.rejected { background: #450a0a; color: #f87171; }
+  .badge.active   { background: #14532d; color: #4ade80; }
+  .badge.draft    { background: #451a03; color: var(--accent); }
+
+  /* Typing indicator */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing span {
+    width: 6px; height: 6px; background: var(--muted);
+    border-radius: 50%; animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+
+  /* ── Input area ── */
+  .input-area {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .input-wrap {
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    transition: border-color 0.15s;
+  }
+  .input-wrap:focus-within { border-color: var(--accent); }
+
+  #msg-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: 'Sora', sans-serif;
+    font-size: 13.5px; line-height: 1.5; resize: none;
+    max-height: 120px; min-height: 22px;
+  }
+  #msg-input::placeholder { color: var(--muted); }
+
+  .send-btn {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--accent); border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .input-hint { font-size: 10px; color: var(--muted); margin-top: 8px; text-align: center; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; width: 340px;
+    transform: translateY(10px); transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal h3 { font-size: 15px; margin-bottom: 6px; }
+  .modal p  { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+  .modal-input {
+    width: 100%; padding: 9px 12px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: 'Sora', sans-serif; font-size: 13px;
+    outline: none; margin-bottom: 12px;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-cancel {
+    padding: 8px 16px; background: transparent;
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-family: 'Sora', sans-serif;
+    font-size: 12px; cursor: pointer;
+  }
+  .btn-primary {
+    padding: 8px 16px; background: var(--accent);
+    border: none; border-radius: 8px; color: #0f0f10;
+    font-family: 'Sora', sans-serif; font-size: 12px;
+    font-weight: 600; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <div class="logo">
+        <div class="logo-mark">A</div>
+        <div>
+          <div class="logo-text">AfCEN</div>
+          <div class="logo-sub">Venture Platform</div>
+        </div>
+      </div>
+      <button class="new-chat-btn" onclick="newChat()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Venture
+      </button>
+    </div>
+
+    <div class="sidebar-label">Ventures</div>
+    <div class="venture-list" id="venture-list">
+      <div style="padding: 12px 10px; font-size: 11px; color: var(--muted);">No ventures yet</div>
+    </div>
+
+    <div class="sidebar-footer" id="builder-footer">No builder selected</div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Builder bar -->
+    <div class="builder-bar">
+      <label>Builder</label>
+      <select class="builder-select" id="builder-select" onchange="selectBuilder(this.value, this.options[this.selectedIndex].text)">
+        <option value="">— select a builder —</option>
+      </select>
+      <button class="add-builder-btn" onclick="openModal()">+ New Builder</button>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat-area" id="chat-area">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🌱</div>
+        <div class="empty-title">What's your venture?</div>
+        <div class="empty-sub">Describe your business in plain language — what you're selling, where you are, and what you need help with.</div>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="useChip(this)">I have 80 crates of tomatoes in Tamale, what should I charge?</div>
+          <div class="chip" onclick="useChip(this)">I sell yams in Kumasi market, need a price</div>
+          <div class="chip" onclick="useChip(this)">I have 20 bags of maize in Accra</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="msg-input" rows="1" placeholder="Describe your venture or ask a question…"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f0f10" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-hint">Press Enter to send · Shift+Enter for new line</div>
+    </div>
+  </main>
+</div>
+
+<!-- New Builder Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Register a Builder</h3>
+    <p>Enter the builder's name to create their account.</p>
+    <input class="modal-input" id="builder-name-input" placeholder="e.g. Ama Asante" onkeydown="if(event.key==='Enter') createBuilder()"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="createBuilder()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── State ──
+  let currentBuilderId   = null;
+  let currentVentureId   = null;  // set only during active approval
+  let selectedVentureId  = null;  // highlights sidebar item
+  let pendingApprovalId  = null;
+  let ventures           = [];
+
+  // ── Boot ── fetch all builders from DB, no localStorage
+  async function boot() {
+    await loadBuilders();
+  }
+
+  // ── Builders ──
+  async function loadBuilders() {
+    const res  = await fetch('/builders/');
+    const list = await res.json();
+
+    const sel = document.getElementById('builder-select');
+    sel.innerHTML = '<option value="">— select a builder —</option>';
+    list.forEach(b => {
+      const o = document.createElement('option');
+      o.value = b.id; o.textContent = b.name;
+      sel.appendChild(o);
+    });
+
+    // If only one builder exists, auto-select them
+    if (list.length === 1) {
+      sel.value = list[0].id;
+      selectBuilder(list[0].id, list[0].name);
+    }
+  }
+
+  function openModal()  { document.getElementById('modal').classList.add('open'); document.getElementById('builder-name-input').focus(); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); document.getElementById('builder-name-input').value = ''; }
+
+  async function createBuilder() {
+    const name = document.getElementById('builder-name-input').value.trim();
+    if (!name) return;
+
+    const res     = await fetch('/builders/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name})
+    });
+    const builder = await res.json();
+
+    closeModal();
+    await loadBuilders();
+    document.getElementById('builder-select').value = builder.id;
+    selectBuilder(builder.id, builder.name);
+  }
+
+  function selectBuilder(id, name) {
+    currentBuilderId  = id || null;
+    currentVentureId  = null;
+    selectedVentureId = null;
+    pendingApprovalId = null;
+
+    // Get name from dropdown if not passed
+    if (!name) {
+      const sel = document.getElementById('builder-select');
+      name = sel.options[sel.selectedIndex]?.text || '';
+    }
+    document.getElementById('builder-footer').textContent = name ? `👤 ${name}` : 'No builder selected';
+
+    newChat();
+    if (currentBuilderId) loadVentures();
+  }
+
+  // ── Ventures sidebar — all from DB ──
+  async function loadVentures() {
+    if (!currentBuilderId) return;
+    const r = await fetch(`/builders/${currentBuilderId}/ventures`);
+    ventures = r.ok ? await r.json() : [];
+    renderSidebar();
+  }
+
+  function renderSidebar() {
+    const list = document.getElementById('venture-list');
+    if (!ventures.length) {
+      list.innerHTML = '<div style="padding: 12px 10px; font-size: 11px; color: var(--muted);">No ventures yet</div>';
+      return;
+    }
+
+    list.innerHTML = ventures.map(v => `
+      <div class="venture-item ${v.id === selectedVentureId ? 'active' : ''}" onclick="loadVentureChat('${v.id}')">
+        <div class="venture-title">${v.commodity ? `${v.quantity} ${v.quantity_unit} of ${v.commodity}` : v.raw_message.slice(0, 40)}</div>
+        <div class="venture-meta">
+          <span class="status-dot ${v.status}"></span>
+          <span>${v.location || '—'} · ${v.status}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function loadVentureChat(ventureId) {
+    selectedVentureId = ventureId;
+    currentVentureId  = null;
+    pendingApprovalId = null;
+    clearChat();
+    renderSidebar();
+
+    const r = await fetch(`/ventures/${ventureId}`);
+    const v = await r.json();
+
+    addMessage('user', `<p>${escHtml(v.raw_message)}</p>`, '👤');
+    addMessage('agent', `
+      <p>Here's the summary for this venture:</p>
+      <p>
+        <strong>Commodity:</strong> ${v.commodity || '—'}<br>
+        <strong>Location:</strong> ${v.location || '—'}<br>
+        <strong>Quantity:</strong> ${v.quantity} ${v.quantity_unit}<br>
+        <strong>Status:</strong> <span class="badge ${v.status}">${v.status}</span>
+      </p>
+      <p style="font-size:11px; color:var(--muted); margin-top:8px">
+        Type a new message below to start a fresh venture.
+      </p>
+    `, 'A');
+  }
+
+  // ── Chat ──
+  function newChat() {
+    currentVentureId  = null;
+    selectedVentureId = null;
+    pendingApprovalId = null;
+    clearChat();
+    renderSidebar();
+  }
+
+  function clearChat() {
+    const area = document.getElementById('chat-area');
+    area.innerHTML = `
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🌱</div>
+        <div class="empty-title">What's your venture?</div>
+        <div class="empty-sub">Describe your business in plain language — what you're selling, where you are, and what you need help with.</div>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="useChip(this)">I have 80 crates of tomatoes in Tamale, what should I charge?</div>
+          <div class="chip" onclick="useChip(this)">I sell yams in Kumasi market, need a price</div>
+          <div class="chip" onclick="useChip(this)">I have 20 bags of maize in Accra</div>
+        </div>
+      </div>`;
+  }
+
+  function useChip(el) {
+    document.getElementById('msg-input').value = el.textContent;
+    autoResize(document.getElementById('msg-input'));
+    document.getElementById('msg-input').focus();
+  }
+
+  function addMessage(role, html, avatarChar) {
+    const empty = document.getElementById('empty-state');
+    if (empty) empty.remove();
+
+    const area = document.getElementById('chat-area');
+    const row  = document.createElement('div');
+    row.className = `msg-row ${role}`;
+    row.innerHTML = `
+      <div class="avatar ${role}">${avatarChar}</div>
+      <div class="msg-content">
+        <div class="msg-sender">${role === 'user' ? 'You' : 'AfCEN Agent'}</div>
+        <div class="msg-text">${html}</div>
+      </div>`;
+    area.appendChild(row);
+    area.scrollTop = area.scrollHeight;
+    return row;
+  }
+
+  function addTyping() {
+    const empty = document.getElementById('empty-state');
+    if (empty) empty.remove();
+
+    const area = document.getElementById('chat-area');
+    const row  = document.createElement('div');
+    row.className = 'msg-row agent';
+    row.id = 'typing-row';
+    row.innerHTML = `
+      <div class="avatar agent">A</div>
+      <div class="msg-content">
+        <div class="msg-sender">AfCEN Agent</div>
+        <div class="typing"><span></span><span></span><span></span></div>
+      </div>`;
+    area.appendChild(row);
+    area.scrollTop = area.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-row');
+    if (t) t.remove();
+  }
+
+  // ── Send ──
+  async function safeJson(response) {
+    // Safely parse JSON — if server returns HTML error page, give a clean message
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(response.status === 500
+        ? 'The server ran into an error. Check that both servers are running and your API key is set.'
+        : `Server error ${response.status}`);
+    }
+  }
+
+  async function sendMessage() {
+    if (!currentBuilderId) {
+      alert('Please select or create a builder first.');
+      return;
+    }
+
+    const input = document.getElementById('msg-input');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    autoResize(input);
+    document.getElementById('send-btn').disabled = true;
+
+    addMessage('user', `<p>${escHtml(text)}</p>`, '👤');
+    addTyping();
+
+    try {
+      await runIntake(text);
+    } catch (e) {
+      removeTyping();
+      addMessage('agent', `<p style="color:#f87171">${escHtml(e.message)}</p>`, 'A');
+    }
+
+    document.getElementById('send-btn').disabled = false;
+  }
+
+  async function runIntake(message) {
+    // 1. Intake — AI reads the message and extracts structured info
+    const ir     = await fetch('/intake/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({builder_id: currentBuilderId, message})
+    });
+    const intake = await safeJson(ir);
+    if (!ir.ok) throw new Error(intake.detail || 'Intake failed');
+
+    removeTyping();
+
+    // No venture created — greeting or missing info — just show the message
+    if (!intake.venture_id || intake.venture_id === 'none') {
+      addMessage('agent', `<div>${markdownToHtml(intake.message)}</div>`, 'A');
+      currentVentureId = null;
+      return;
+    }
+
+    currentVentureId = intake.venture_id;
+
+    // Has commodity but missing location or quantity — show follow-up question
+    if (!intake.location || !intake.quantity) {
+      addMessage('agent', `<div>${markdownToHtml(intake.message)}</div>`, 'A');
+      currentVentureId = null; // keep chat open for next message
+      return;
+    }
+
+    // We have everything — show what the AI understood
+    addMessage('agent', `
+      <p>${escHtml(intake.message)}</p>
+      <p style="font-size:12px; color:var(--muted)">
+        Intent: <strong style="color:var(--text)">${intake.intent}</strong> &middot;
+        Commodity: <strong style="color:var(--text)">${intake.commodity}</strong> &middot;
+        Location: <strong style="color:var(--text)">${intake.location}</strong> &middot;
+        Quantity: <strong style="color:var(--text)">${intake.quantity} ${intake.quantity_unit}</strong>
+      </p>
+    `, 'A');
+
+    // 2. Trigger pricing agent
+    addTyping();
+    const pr       = await fetch('/ventures/' + intake.venture_id + '/price', { method: 'POST' });
+    const proposal = await safeJson(pr);
+    removeTyping();
+    if (!pr.ok) throw new Error(proposal.detail || 'Pricing failed');
+
+    pendingApprovalId = proposal.approval_id;
+
+    // Show price proposal with approval card
+    addMessage('agent', `
+      <p>I've checked the market in <strong>${escHtml(intake.location)}</strong>. Here's my pricing proposal:</p>
+      <div class="approval-card">
+        <div class="approval-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Awaiting your approval
+        </div>
+        <div class="approval-body">
+          <div class="price-range">
+            <span class="price-currency">${proposal.currency}</span>${proposal.proposed_low} &ndash; ${proposal.proposed_high}
+            <span style="font-size:12px; color:var(--muted)"> per ${intake.quantity_unit}</span>
+          </div>
+          <div class="reasoning-text">${escHtml(proposal.reasoning)}</div>
+          <div class="market-summary">${escHtml(proposal.market_data_summary)}</div>
+          <div class="approval-actions">
+            <button class="btn-approve" onclick="resolve('approve')">✓ Approve</button>
+            <button class="btn-reject"  onclick="resolve('reject')">✗ Reject</button>
+            <button class="btn-edit"    onclick="toggleEdit()">✎ Edit Price</button>
+          </div>
+          <div class="edit-row" id="edit-row">
+            <input class="edit-input" id="edit-val" type="number" step="0.5" placeholder="Enter your price (GHS)"/>
+            <button class="btn-confirm-edit" onclick="resolve('edit')">Confirm</button>
+          </div>
+        </div>
+      </div>
+    `, 'A');
+
+    loadVentures();
+  }
+
+  function toggleEdit() {
+    const row = document.getElementById('edit-row');
+    row.style.display = row.style.display === 'flex' ? 'none' : 'flex';
+    if (row.style.display === 'flex') document.getElementById('edit-val').focus();
+  }
+
+  async function resolve(decision) {
+    if (!pendingApprovalId) return;
+
+    const body = { decision };
+    if (decision === 'edit') {
+      const val = parseFloat(document.getElementById('edit-val').value);
+      if (isNaN(val)) { alert('Please enter a valid price.'); return; }
+      body.edited_value = val;
+    }
+
+    const r = await fetch(`/approvals/${pendingApprovalId}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const result = await r.json();
+
+    pendingApprovalId = null;
+
+    document.querySelectorAll('.approval-actions, .edit-row').forEach(el => el.remove());
+
+    const statusMap = { approved: 'approved', rejected: 'rejected', edited: 'approved' };
+    const badge = statusMap[result.status] || result.status;
+
+    addMessage('agent', `
+      <p>${escHtml(result.message)}</p>
+      <p><span class="badge ${badge}">${result.status}</span>${result.final_price ? ` · Final price: <strong>GHS ${result.final_price.toFixed(2)}</strong>` : ''}</p>
+    `, 'A');
+
+    loadVentures();
+  }
+
+  // ── Utils ──
+  function markdownToHtml(str) {
+    // Convert simple markdown to HTML for agent messages
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/[<]/g, '&lt;').replace(/[>]/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>')
+      .replace(/^/, '<p>').replace(/$/, '</p>');
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/[<]/g, '&lt;')
+      .replace(/[>]/g, '&gt;')
+      .replace(/\n/g, '<br>');
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  boot();
+</script>
+</body>
+</html>
