@@ -57,8 +57,34 @@ afcen/
 
 ## Setup
 
-### 1. Clone and install
+## Prerequisites
+Python 3.11+
+Git
+pip
 
+Verify installation:
+
+### Windows
+```powershell
+python --version
+pip --version
+git --version```
+
+### linux
+```bash
+python3 --version
+pip3 --version
+git --version```
+
+### 1. Clone and install
+### windows
+
+```powershell
+git clone <repo-url>
+cd afcen
+pip install -r requirements.txt```
+
+### linux
 ```bash
 git clone <repo-url>
 cd afcen
@@ -67,6 +93,12 @@ pip install -r requirements.txt
 
 ### 2. Configure environment
 
+### windows
+```powershell
+python -m venv venv
+venv\Scripts\activate```
+
+###linux
 ```bash
 cp .env .env.local
 # Edit .env and set your ANTHROPIC_API_KEY
@@ -75,12 +107,22 @@ cp .env .env.local
 
 ### 3. Run the mock Signal/Market API (Terminal 1)
 
+###windows
+```powershell
+uvicorn mock_signal_api.server:app --port 8001 --reload```
+
+### linux
 ```bash
 uvicorn mock_signal_api.server:app --port 8001 --reload
 ```
 
 ### 4. Run the main app (Terminal 2)
 
+###windows
+```powershell
+uvicorn main:app --reload```
+
+### linux
 ```bash
 uvicorn main:app --reload
 ```
@@ -89,7 +131,11 @@ The database (`afcen.db`) is created automatically on first run.
 API docs available at: **http://localhost:8000/docs**
 
 ### 5. Run the demo (Terminal 3)
+### windows
+```powershell
+python script.py```
 
+### linux
 ```bash
 python script.py
 ```
