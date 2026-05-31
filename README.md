@@ -68,13 +68,15 @@ Verify installation:
 ```powershell
 python --version
 pip --version
-git --version```
+git --version
+```
 
 ### linux
 ```bash
 python3 --version
 pip3 --version
-git --version```
+git --version
+```
 
 ### 1. Clone and install
 ### windows
@@ -82,7 +84,8 @@ git --version```
 ```powershell
 git clone <repo-url>
 cd afcen
-pip install -r requirements.txt```
+pip install -r requirements.txt
+```
 
 ### linux
 ```bash
@@ -94,12 +97,14 @@ pip install -r requirements.txt
 ### 2. Configure environment
 
 ### windows
-```powershell
+```
+powershell
 python -m venv venv
-venv\Scripts\activate```
-
+venv\Scripts\activate
+```
 ### linux
-```bash
+```
+bash
 cp .env .env.local
 # Edit .env and set your ANTHROPIC_API_KEY
 # Leave it as "stub" to run without an API key (uses deterministic stub responses)
@@ -109,7 +114,8 @@ cp .env .env.local
 
 ### windows
 ```powershell
-uvicorn mock_signal_api.server:app --port 8001 --reload```
+uvicorn mock_signal_api.server:app --port 8001 --reload
+```
 
 ### linux
 ```bash
@@ -120,7 +126,8 @@ uvicorn mock_signal_api.server:app --port 8001 --reload
 
 ### windows
 ```powershell
-uvicorn main:app --reload```
+uvicorn main:app --reload
+```
 
 ### linux
 ```bash
@@ -133,7 +140,8 @@ API docs available at: **http://localhost:8000/docs**
 ### 5. Run the demo (Terminal 3)
 ### windows
 ```powershell
-python script.py```
+python script.py
+```
 
 ### linux
 ```bash
