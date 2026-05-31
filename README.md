@@ -98,7 +98,7 @@ pip install -r requirements.txt
 python -m venv venv
 venv\Scripts\activate```
 
-###linux
+### linux
 ```bash
 cp .env .env.local
 # Edit .env and set your ANTHROPIC_API_KEY
@@ -107,7 +107,7 @@ cp .env .env.local
 
 ### 3. Run the mock Signal/Market API (Terminal 1)
 
-###windows
+### windows
 ```powershell
 uvicorn mock_signal_api.server:app --port 8001 --reload```
 
@@ -118,7 +118,7 @@ uvicorn mock_signal_api.server:app --port 8001 --reload
 
 ### 4. Run the main app (Terminal 2)
 
-###windows
+### windows
 ```powershell
 uvicorn main:app --reload```
 
